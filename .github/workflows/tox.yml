@@ -59,12 +59,14 @@ jobs:
       if: matrix.env == 'py314' || startsWith(matrix.env, 'py314-')
     - uses: ./.github/actions/pre-test
       if: ${{ hashFiles('.github/actions/pre-test/action.yml') != '' }}
-    - run: python -mpip install --upgrade setuptools tox virtualenv
+    - run: python -mpip install --upgrade setuptools virtualenv
+    - run: python -mpip install tox
+      if: ${{ !inputs.uv }}
     - run: python -mpip install uv
       if: inputs.uv
     - run: python -muv tool install tox --with tox-uv
       if: inputs.uv  
-    - run: python -mtox -e ${{ matrix.env }}
+    - run: tox -e ${{ matrix.env }}
     - name: build wheels
       run: |
         set -x
