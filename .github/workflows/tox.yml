@@ -20,6 +20,10 @@ on:
         required: false
         type: boolean
         default: false
+      uv:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   tox:
@@ -56,6 +60,10 @@ jobs:
     - uses: ./.github/actions/pre-test
       if: ${{ hashFiles('.github/actions/pre-test/action.yml') != '' }}
     - run: python -mpip install --upgrade setuptools tox virtualenv
+    - run: python -mpip install uv
+      if: inputs.uv
+    - run: python -muv tool install tox --with tox-uv
+      if: inputs.uv  
     - run: tox -e ${{ matrix.env }}
     - name: build wheels
       run: |
