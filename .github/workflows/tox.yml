@@ -64,8 +64,7 @@ jobs:
       if: inputs.uv
     - run: python -muv tool install tox --with tox-uv
       if: inputs.uv  
-    - run: tox --version
-    - run: tox -e ${{ matrix.env }}
+    - run: python -mtox -e ${{ matrix.env }}
     - name: build wheels
       run: |
         set -x
