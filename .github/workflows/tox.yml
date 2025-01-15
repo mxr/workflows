@@ -57,8 +57,8 @@ jobs:
       if: ${{ hashFiles('.github/actions/pre-test/action.yml') != '' }}
     - run: python -mpip install --upgrade setuptools virtualenv uv
     - run: python -muv tool install tox --with tox-uv
-    - run: echo
-    - if: ${{ runner.os == 'Windows' }}
+    - run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      if: ${{ runner.os == 'Windows' }}
     - run: tox -e ${{ matrix.env }}
     - name: build wheels
       run: |
