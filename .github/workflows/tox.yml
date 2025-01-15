@@ -57,7 +57,7 @@ jobs:
       if: ${{ hashFiles('.github/actions/pre-test/action.yml') != '' }}
     - run: python -mpip install --upgrade setuptools virtualenv uv
     - run: python -muv tool install tox --with tox-uv
-    - run: python -mtox -e ${{ matrix.env }}
+    - run: tox -e ${{ matrix.env }}
     - name: build wheels
       run: |
         set -x
