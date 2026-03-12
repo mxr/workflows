@@ -12,7 +12,8 @@ jobs:
     permissions: {}
     steps:
     - name: Keep cronjob based triggers of GitHub workflows alive
-      uses: PhrozenByte/gh-workflow-immortality@v1.1.3
+      uses: PhrozenByte/gh-workflow-immortality@8c1ebe0c3542d2a477ade857b757eb233dd3166b
       with:
         secret: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         owner_repos: true
+        no_repo_names: true
