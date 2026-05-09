@@ -3,12 +3,12 @@ name: PyPI release
 on:
   workflow_call:
     inputs:
-      environment_name:
+      environment:
         description: GitHub environment name to use for trusted publishing.
         required: false
         type: string
         default: pypi
-      pypi_project_name:
+      project:
         description: PyPI project name used for the environment URL.
         required: false
         type: string
@@ -21,8 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
-      name: ${{ inputs.environment_name }}
-      url: ${{ format('https://pypi.org/p/{0}', inputs.pypi_project_name || github.event.repository.name) }}
+      name: ${{ inputs.environment }}
+      url: ${{ format('https://pypi.org/p/{0}', inputs.project || github.event.repository.name) }}
     permissions:
       contents: write
       id-token: write
