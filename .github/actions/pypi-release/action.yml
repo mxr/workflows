@@ -9,11 +9,11 @@ inputs:
   package-dir:
     description: Directory containing the project to release.
     required: false
-    default: '.'
+    default: .
   packages-dir:
     description: Directory containing built distributions.
     required: false
-    default: 'dist/'
+    default: dist/
 
 runs:
   using: composite
