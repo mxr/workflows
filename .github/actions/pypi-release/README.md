@@ -5,6 +5,7 @@ This reusable workflow builds a release, publishes the distributions to PyPI wit
 ## Requirements
 
 - The caller repository must configure the matching PyPI trusted publisher.
+- The workflow fails fast if it is not run on a tag ref.
 
 ## Example
 
@@ -18,4 +19,3 @@ jobs:
 ```
 
 Both inputs are optional. `environment` defaults to `pypi`, and `project` defaults to the repository name.
-The workflow fails fast if it is not run on a tag ref.
