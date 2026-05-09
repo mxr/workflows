@@ -24,7 +24,7 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         persist-credentials: false
+    # update this to the version you want
     - uses: mxr/workflows/.github/actions/pypi-release@XXX # vYYY
 ```
 
-Pin the action reference to a commit SHA or release tag in real usage.
