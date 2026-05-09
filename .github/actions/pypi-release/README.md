@@ -25,8 +25,6 @@ jobs:
       with:
         persist-credentials: false
     - uses: mxr/workflows/.github/actions/pypi-release@main
-      with:
-        python-version: '3.12'
 ```
 
 Pin the action reference to a commit SHA or release tag in real usage.
