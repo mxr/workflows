@@ -27,4 +27,3 @@ jobs:
     # update this to the version you want
     - uses: mxr/workflows/.github/actions/pypi-release@XXX # vYYY
 ```
-
