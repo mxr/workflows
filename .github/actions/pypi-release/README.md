@@ -14,8 +14,8 @@ jobs:
   release:
     uses: mxr/workflows/.github/workflows/pypi-release.yml@XXX # vYYY
     with:
-      environment_name: pypi
-      pypi_project_name: your-pypi-project-name
+      environment: pypi
+      project: your-pypi-project-name
 ```
 
-Both inputs are optional. `environment_name` defaults to `pypi`, and `pypi_project_name` defaults to the repository name.
+Both inputs are optional. `environment` defaults to `pypi`, and `project` defaults to the repository name.
