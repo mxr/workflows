@@ -2,6 +2,9 @@ name: GitHub release
 
 on:
   workflow_call:
+  push:
+    tags:
+    - '*'
 
 permissions: {}
 
