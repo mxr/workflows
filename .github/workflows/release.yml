@@ -1,0 +1,14 @@
+name: Release
+
+on:
+  push:
+    tags:
+    - '*'
+
+permissions: {}
+
+jobs:
+  github-release:
+    permissions:
+      contents: write
+    uses: ./.github/workflows/github-release.yml
