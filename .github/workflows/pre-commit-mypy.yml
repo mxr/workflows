@@ -1,0 +1,58 @@
+name: Pre-commit mypy
+
+on:
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  pre-commit-mypy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
+    - name: Create mypy-only pre-commit config
+      id: config
+      shell: bash
+      run: |
+        ruby <<'RUBY'
+        require 'yaml'
+
+        config = YAML.load_file('.pre-commit-config.yaml')
+        python = config.dig('default_language_version', 'python')
+        if python.nil?
+          warn 'default_language_version.python is required'
+          exit 1
+        end
+
+        repos = config.fetch('repos').filter_map do |repo|
+          hooks = Array(repo['hooks']).select { |hook| hook['id'] == 'mypy' }
+          next if hooks.empty?
+
+          repo.merge('hooks' => hooks)
+        end
+
+        if repos.empty?
+          warn 'mypy pre-commit hook is required'
+          exit 1
+        end
+
+        File.write(
+          '.pre-commit-config-mypy.yaml',
+          {
+            'default_language_version' => {'python' => python},
+            'repos' => repos,
+          }.to_yaml,
+        )
+
+        File.open(ENV.fetch('GITHUB_OUTPUT'), 'a') do |f|
+          f.puts "python-version=#{python.delete_prefix('python')}"
+        end
+        RUBY
+    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: ${{ steps.config.outputs.python-version }}
+    - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+      with:
+        extra_args: --config .pre-commit-config-mypy.yaml mypy --all-files
