@@ -27,14 +27,14 @@ jobs:
         end
 
         repos = config.fetch('repos').filter_map do |repo|
-          hooks = Array(repo['hooks']).select { |hook| %w[mypy ty].include?(hook['id']) }
+          hooks = Array(repo['hooks']).select { |hook| %w[mypy pyright ty].include?(hook['id']) }
           next if hooks.empty?
 
           repo.merge('hooks' => hooks)
         end
 
         if repos.empty?
-          warn 'mypy or ty pre-commit hook is required'
+          warn 'python typing pre-commit hook is required'
           exit 1
         end
 
