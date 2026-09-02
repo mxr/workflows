@@ -28,7 +28,9 @@ jobs:
 
         repos = config.fetch('repos').filter_map do |repo|
           hooks = Array(repo['hooks']).select { |hook| %w[mypy pyright ty].include?(hook['id']) }
-          repo.merge('hooks' => hooks) unless hooks.empty?
+          next if hooks.empty?
+
+          repo.merge('hooks' => hooks)
         end
 
         if repos.empty?
