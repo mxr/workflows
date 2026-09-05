@@ -21,13 +21,13 @@ Or call directly on tag push -- the workflow already triggers on `push: tags: ['
 
 ### `pre-commit-typing`
 
-Runs `mypy` or `ty` type checking via pre-commit. Extracts typing hooks from
+Runs `mypy`, `ty`, or `pyright` type checking via pre-commit. Extracts typing hooks from
 your `.pre-commit-config.yaml` and runs them in isolation.
 
 **Requirements:**
 
 - `.pre-commit-config.yaml` must set `default_language_version.python`
-- At least one hook with id `mypy` or `ty`
+- At least one type checking hook from the list above
 
 **Usage:**
 
