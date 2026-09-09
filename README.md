@@ -6,8 +6,7 @@ Reusable GitHub Actions workflows. Also hosts personal cron workflows.
 
 ### `github-release`
 
-Creates a GitHub release when a tag is pushed. Uses `gh release create` with
-auto-generated release notes.
+Creates a GitHub release when a tag is pushed. Uses `gh release create` with auto-generated release notes.
 
 **Usage:**
 
@@ -21,8 +20,8 @@ Or call directly on tag push -- the workflow already triggers on `push: tags: ['
 
 ### `pre-commit-typing`
 
-Runs `mypy`, `ty`, or `pyright` type checking via pre-commit. Extracts typing hooks from
-your `.pre-commit-config.yaml` and runs them in isolation.
+Runs `mypy`, `ty`, or `pyright` type checking via pre-commit. Extracts typing hooks from your `.pre-commit-config.yaml`
+and runs them in isolation.
 
 **Requirements:**
 
