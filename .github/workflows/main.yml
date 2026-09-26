@@ -8,7 +8,7 @@ on:
 jobs:
   keepalive:
     name: GitHub Workflow Immortality
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions: {}
     steps:
     - name: Keep cronjob based triggers of GitHub workflows alive
