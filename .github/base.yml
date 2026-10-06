@@ -1,1 +1,4 @@
 stack: [github-actions]
+opt:
+  github-actions:
+    custom-managers: [github-actions-versions]
