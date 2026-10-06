@@ -5,18 +5,28 @@ on:
 
 permissions: {}
 
+env:
+  # renovate: datasource=pypi depName=pre-commit
+  PRE_COMMIT_VERSION: 4.6.2
+  # renovate: datasource=pypi depName=pre-commit-uv
+  PRE_COMMIT_UV_VERSION: 4.3.0
+
 jobs:
-  pre-commit-typing:
+  config:
     runs-on: ubuntu-26.04
+    outputs:
+      hooks: ${{ steps.config.outputs.hooks }}
+      python-version: ${{ steps.config.outputs.python-version }}
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
-    - name: Create typing-only pre-commit config
+    - name: Create typing-only pre-commit configs
       id: config
       shell: bash
       run: |
         ruby <<'RUBY'
+        require 'json'
         require 'yaml'
 
         config = YAML.load_file('.pre-commit-config.yaml')
@@ -26,31 +36,57 @@ jobs:
           exit 1
         end
 
-        repos = config.fetch('repos').filter_map do |repo|
-          hooks = Array(repo['hooks']).select { |hook| %w[mypy pyright ty].include?(hook['id']) }
-          repo.merge('hooks' => hooks) unless hooks.empty?
+        hooks = config.fetch('repos').flat_map do |repo|
+          Array(repo['hooks']).select { |hook| %w[mypy pyright ty].include?(hook['id']) }.map do |hook|
+            {
+              'id' => hook['id'],
+              'config' => {
+                'default_language_version' => {'python' => python},
+                'repos' => [repo.merge('hooks' => [hook])],
+              }.to_yaml,
+            }
+          end
         end
 
-        if repos.empty?
+        if hooks.empty?
           warn 'python typing pre-commit hook is required'
           exit 1
         end
 
-        File.write(
-          '.pre-commit-config-typing.yaml',
-          {
-            'default_language_version' => {'python' => python},
-            'repos' => repos,
-          }.to_yaml,
-        )
-
         File.open(ENV.fetch('GITHUB_OUTPUT'), 'a') do |f|
+          f.puts "hooks=#{hooks.to_json}"
           f.puts "python-version=#{python.delete_prefix('python')}"
         end
         RUBY
+
+  pre-commit-typing:
+    name: pre-commit-typing (${{ matrix.hook.id }})
+    needs: config
+    runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        hook: ${{ fromJSON(needs.config.outputs.hooks) }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - name: Write pre-commit config
+      shell: bash
+      env:
+        CONFIG: ${{ matrix.hook.config }}
+      run: printf '%s' "$CONFIG" > .pre-commit-config-typing.yaml
     - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
-        python-version: ${{ steps.config.outputs.python-version }}
-    - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+        python-version: ${{ needs.config.outputs.python-version }}
+    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
-        extra_args: --config .pre-commit-config-typing.yaml --all-files
+        path: ~/.cache/pre-commit
+        key: pre-commit-typing/${{ runner.os }}/${{ matrix.hook.id }}/${{ hashFiles('.pre-commit-config-typing.yaml') }}
+    - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      with:
+        enable-cache: false
+        version: 0.12.23
+    - name: Run pre-commit
+      shell: bash
+      run: uv tool run --from "pre-commit==${PRE_COMMIT_VERSION}" --with "pre-commit-uv==${PRE_COMMIT_UV_VERSION}" pre-commit run --show-diff-on-failure --color=always --config .pre-commit-config-typing.yaml --all-files
