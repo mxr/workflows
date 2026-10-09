@@ -10,30 +10,20 @@ on:
       env:
         required: true
         type: string
-      arch:
-        required: false
-        type: string
-        default: '[""]'
-      submodules:
-        required: false
-        type: boolean
-        default: false
 
 permissions: {}
 
 jobs:
   tox:
-    name: ${{ inputs.os }} / ${{ matrix.env }}${{ inputs.arch != '[""]' && format(' /  {0}', matrix.arch) || '' }}
+    name: ${{ inputs.os }} / ${{ matrix.env }}
     runs-on: ${{ inputs.os }}
     strategy:
       matrix:
         env: ${{ fromJSON(inputs.env) }}
-        arch: ${{ fromJSON(inputs.arch) }}
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
-        submodules: ${{ inputs.submodules }}
     - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: |
@@ -45,7 +35,6 @@ jobs:
             (matrix.env == 'py313' || startsWith(matrix.env, 'py313-')) && '3.13' ||
             '3.14'
           }}
-        architecture: ${{ matrix.arch }}
       if: matrix.env != 'py315' && !startsWith(matrix.env, 'py315-')
     - uses: deadsnakes/action@e640ac8743173a67cca4d7d77cd837e514bf98e8 # v3.2.0
       with:
