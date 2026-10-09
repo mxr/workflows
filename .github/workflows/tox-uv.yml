@@ -28,5 +28,6 @@ jobs:
         enable-cache: false
     - run: uv tool install tox --with tox-uv
     - run: tox -e "$MATRIX_ENV"
+      shell: bash
       env:
         MATRIX_ENV: ${{ matrix.env }}
