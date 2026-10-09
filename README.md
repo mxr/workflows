@@ -24,8 +24,8 @@ jobs:
 
 ### `tox-uv`
 
-Runs tox environments with [`tox-uv`](https://github.com/tox-dev/tox-uv). Based on
-[`asottile/workflows` `tox.yml`](https://github.com/asottile/workflows/blob/main/.github/workflows/tox.yml), but
+Runs tox environments with [`tox-uv`](https://github.com/tox-dev/tox-uv). Its API mirrors
+[`asottile/workflows` `tox.yml`](https://github.com/asottile/workflows/blob/main/.github/workflows/tox.yml), but it
 installs tox with `uv` so projects can use `uv.lock` via `runner = "uv-venv-lock-runner"`.
 
 **Inputs:**
