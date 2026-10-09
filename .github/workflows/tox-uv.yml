@@ -4,9 +4,8 @@ on:
   workflow_call:
     inputs:
       os:
-        required: false
+        required: true
         type: string
-        default: ubuntu-latest
       env:
         required: true
         type: string

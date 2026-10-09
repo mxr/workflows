@@ -31,7 +31,7 @@ installs tox with `uv` so projects can use `uv.lock` via `runner = "uv-venv-lock
 **Inputs:**
 
 - `env` (required): JSON list of tox environments, e.g. `'["py312", "py313"]'`
-- `os`: runner OS, defaults to `ubuntu-latest`
+- `os` (required): runner OS, e.g. `ubuntu-26.04`
 
 **Usage:**
 
@@ -41,4 +41,5 @@ jobs:
     uses: mxr/workflows/.github/workflows/tox-uv.yml@main
     with:
       env: '["py312", "py313", "py314"]'
+      os: ubuntu-26.04
 ```
