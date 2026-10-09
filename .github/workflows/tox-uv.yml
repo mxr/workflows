@@ -31,12 +31,3 @@ jobs:
     - run: tox -e "$MATRIX_ENV"
       env:
         MATRIX_ENV: ${{ matrix.env }}
-
-  collector:
-    needs: [tox]
-    if: always()
-    runs-on: ubuntu-slim
-    steps:
-    - name: check for failures
-      if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
-      run: echo 'dependent job failed' && exit 1
