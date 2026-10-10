@@ -21,3 +21,25 @@ jobs:
   typing:
     uses: mxr/workflows/.github/workflows/pre-commit-typing.yml@main
 ```
+
+### `tox-uv`
+
+Runs tox environments with [`tox-uv`](https://github.com/tox-dev/tox-uv). Its API mirrors
+[`asottile/workflows` `tox.yml`](https://github.com/asottile/workflows/blob/main/.github/workflows/tox.yml), but it
+installs tox with `uv` so projects can use `uv.lock` via `runner = "uv-venv-lock-runner"`.
+
+**Inputs:**
+
+- `env` (required): JSON list of tox environments, e.g. `'["py312", "py313"]'`
+- `os` (required): runner OS, e.g. `ubuntu-latest`
+
+**Usage:**
+
+```yaml
+jobs:
+  tox:
+    uses: mxr/workflows/.github/workflows/tox-uv.yml@main
+    with:
+      env: '["py312", "py313", "py314"]'
+      os: ubuntu-latest
+```

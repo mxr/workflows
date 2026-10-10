@@ -1,0 +1,33 @@
+name: tox-uv
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      env:
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  tox:
+    name: ${{ inputs.os }} / ${{ matrix.env }}
+    runs-on: ${{ inputs.os }}
+    strategy:
+      matrix:
+        env: ${{ fromJSON(inputs.env) }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      with:
+        enable-cache: false
+    - run: uv tool install tox --with tox-uv
+    - run: tox -e "$MATRIX_ENV"
+      shell: bash
+      env:
+        MATRIX_ENV: ${{ matrix.env }}
