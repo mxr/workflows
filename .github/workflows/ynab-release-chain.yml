@@ -24,7 +24,7 @@ jobs:
     - name: Bump and release downstream YNAB packages
       shell: bash
       env:
-        GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        GH_TOKEN: ${{ secrets.YNAB_RELEASE_TOKEN }}
       run: |
         set -euo pipefail
         shopt -s nullglob
