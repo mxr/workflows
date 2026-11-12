@@ -1,0 +1,126 @@
+name: YNAB release chain
+
+on:
+  schedule:
+  - cron: 30 * * * *
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ynab-release-chain
+  cancel-in-progress: false
+
+jobs:
+  release-chain:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 180
+    permissions: {}
+    steps:
+    - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      with:
+        enable-cache: false
+    - name: Bump and release downstream YNAB packages
+      shell: bash
+      env:
+        GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      run: |
+        set -euo pipefail
+        shopt -s nullglob
+
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+        # retry every 30s until the command succeeds or the timeout (seconds) passes
+        wait_for() {
+          local deadline=$((SECONDS + $1))
+          shift
+          until "$@"; do
+            if ((SECONDS >= deadline)); then
+              echo "timed out waiting for: $*" >&2
+              exit 1
+            fi
+            sleep 30
+          done
+        }
+
+        pr_merged() {
+          local state
+          state="$(gh pr view "$1" --repo "$2" --json state --jq .state)"
+          if [[ "$state" == CLOSED ]]; then
+            echo "$2 $1 was closed without merging" >&2
+            exit 1
+          fi
+          [[ "$state" == MERGED ]]
+        }
+
+        # release.yml creates the GitHub release after publishing to PyPI, so
+        # this is the latest version that is installable
+        latest_release() {
+          gh release view --repo "mxr/$1" --json tagName --jq '.tagName | ltrimstr("v")'
+        }
+
+        # sync <repo> <dep>...: pin each dep to its latest release via an
+        # auto-merge PR, then release a new minor version of the repo
+        sync() {
+          local repo="$1"
+          shift
+          local dir="$RUNNER_TEMP/$repo"
+          local remote="https://x-access-token:${GH_TOKEN}@github.com/mxr/$repo.git"
+
+          git clone --quiet "$remote" "$dir"
+          cd "$dir"
+
+          local files=(pyproject.toml .pre-commit-config.yaml custom_components/*/manifest.json)
+          local manifest=(custom_components/*/manifest.json)
+          local title='' branch=bump upgrade=() dep ver
+          for dep in "$@"; do
+            ver="$(latest_release "$dep")"
+            DEP="$dep" VER="$ver" perl -pi -e 's{(?<![A-Za-z0-9_./:-])(\Q$ENV{DEP}\E\s*~=\s*)[A-Za-z0-9.]+}{$1$ENV{VER}}g' "${files[@]}"
+            if ! git diff --quiet; then
+              git add --all
+              title+="${title:+, }$dep to $ver"
+              branch+="-$dep"
+              upgrade+=(--upgrade-package "$dep")
+            fi
+          done
+
+          if [[ -z "$title" ]]; then
+            echo "$repo is up to date"
+            cd - >/dev/null
+            return
+          fi
+
+          if [[ -f uv.lock ]]; then
+            uv lock --refresh "${upgrade[@]}"
+          fi
+          git switch --quiet --create "$branch"
+          git commit --quiet --all --message "Bump $title"
+          git push --quiet --force "$remote" "HEAD:$branch"
+          if [[ "$(gh pr view "$branch" --repo "mxr/$repo" --json state --jq .state 2>/dev/null)" != OPEN ]]; then
+            gh pr create --repo "mxr/$repo" --head "$branch" --title "Bump $title" --body "Automated dependency bump: $title."
+          fi
+          gh pr merge "$branch" --repo "mxr/$repo" --auto --squash --delete-branch
+          wait_for 3600 pr_merged "$branch" "mxr/$repo"
+
+          git switch --quiet main
+          git pull --quiet "$remote" main
+          local new
+          if ((${#manifest[@]})); then
+            new="$(jq -r .version "${manifest[0]}" | awk -F. '{print $1 "." $2 + 1 ".0"}')"
+            NEW="$new" perl -pi -e 's/("version"\s*:\s*")[^"]+"/$1$ENV{NEW}"/' "${manifest[0]}"
+          else
+            uv version --bump minor --no-sync
+            new="$(uv version --short)"
+          fi
+          git commit --quiet --all --message "v$new"
+          git tag "v$new"
+          git push --quiet "$remote" main "refs/tags/v$new"
+          wait_for 1800 gh release view "v$new" --repo "mxr/$repo" --json tagName
+          echo "released $repo v$new"
+          cd - >/dev/null
+        }
+
+        sync sqlite-export-for-ynab asyncio-for-ynab
+        sync manager-for-ynab asyncio-for-ynab sqlite-export-for-ynab
+        sync ha-manager-for-ynab asyncio-for-ynab manager-for-ynab sqlite-export-for-ynab
