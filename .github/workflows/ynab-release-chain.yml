@@ -52,7 +52,21 @@ jobs:
             echo "$2 $1 was closed without merging" >&2
             exit 1
           fi
-          [[ "$state" == MERGED ]]
+          [[ "$state" == MERGED ]] && return
+
+          # a just-released dep can take minutes to reach the PyPI index, so
+          # re-run failed checks a few times instead of waiting out the timeout
+          local failed
+          failed="$(gh pr checks "$1" --repo "$2" --json bucket --jq 'any(.[]; .bucket == "fail")' || true)"
+          if [[ "$failed" == true ]] && ((reruns < 3)); then
+            local run
+            for run in $(gh run list --repo "$2" --branch "$1" --status failure --json databaseId --jq '.[].databaseId'); do
+              echo "re-running failed jobs in $2 run $run"
+              gh run rerun "$run" --repo "$2" --failed
+              reruns=$((reruns + 1))
+            done
+          fi
+          return 1
         }
 
         # release.yml creates the GitHub release after publishing to PyPI, so
@@ -102,6 +116,7 @@ jobs:
             gh pr create --repo "mxr/$repo" --head "$branch" --title "Bump $title" --body "Automated dependency bump: $title."
           fi
           gh pr merge "$branch" --repo "mxr/$repo" --auto --squash --delete-branch
+          reruns=0
           wait_for 3600 pr_merged "$branch" "mxr/$repo"
 
           git switch --quiet main
