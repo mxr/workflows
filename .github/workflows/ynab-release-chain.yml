@@ -69,6 +69,11 @@ jobs:
           return 1
         }
 
+        # checks the simple index that pip and uv resolve from, not the JSON API
+        on_pypi() {
+          curl -fsS -H 'Accept: application/vnd.pypi.simple.v1+json' "https://pypi.org/simple/$1/" | jq -e --arg v "$2" '.versions | index($v) != null' >/dev/null
+        }
+
         # release.yml creates the GitHub release after publishing to PyPI, so
         # this is the latest version that is installable
         latest_release() {
@@ -93,6 +98,8 @@ jobs:
             ver="$(latest_release "$dep")"
             DEP="$dep" VER="$ver" perl -pi -e 's{(?<![A-Za-z0-9_./:-])(\Q$ENV{DEP}\E\s*~=\s*)[A-Za-z0-9.]+}{$1$ENV{VER}}g' "${files[@]}"
             if ! git diff --quiet; then
+              # CI installs deps from PyPI, so don't open the PR until it can
+              wait_for 1800 on_pypi "$dep" "$ver"
               git add --all
               title+="${title:+, }$dep to $ver"
               branch+="-$dep"
@@ -133,6 +140,9 @@ jobs:
           git tag "v$new"
           git push --quiet "$remote" main "refs/tags/v$new"
           wait_for 1800 gh release view "v$new" --repo "mxr/$repo" --json tagName
+          if ((${#manifest[@]} == 0)); then
+            wait_for 1800 on_pypi "$repo" "$new"
+          fi
           echo "released $repo v$new"
           cd - >/dev/null
         }
