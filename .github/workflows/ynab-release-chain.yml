@@ -114,7 +114,8 @@ jobs:
           fi
 
           if [[ -f uv.lock ]]; then
-            uv lock --refresh "${upgrade[@]}"
+            # the CDN can serve a stale index right after on_pypi sees the release
+            wait_for 600 uv lock --refresh "${upgrade[@]}"
           fi
           git switch --quiet --create "$branch"
           git commit --quiet --all --message "Bump $title"
