@@ -85,6 +85,7 @@ jobs:
         sync() {
           local repo="$1"
           shift
+          echo "syncing $repo with $*"
           local dir="$RUNNER_TEMP/$repo"
           local remote="https://x-access-token:${GH_TOKEN}@github.com/mxr/$repo.git"
 
