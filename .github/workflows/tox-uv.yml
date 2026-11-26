@@ -16,6 +16,9 @@ jobs:
   tox:
     name: ${{ inputs.os }} / ${{ matrix.env }}
     runs-on: ${{ inputs.os }}
+    env:
+      # uv cache and checkout are on different drives on Windows, so hardlinks fail
+      UV_LINK_MODE: copy
     strategy:
       matrix:
         env: ${{ fromJSON(inputs.env) }}
