@@ -2,14 +2,18 @@ name: Pre-commit typing
 
 on:
   workflow_call:
+    inputs:
+      uv-version:
+        required: true
+        type: string
+      pre-commit-version:
+        required: true
+        type: string
+      pre-commit-uv-version:
+        required: true
+        type: string
 
 permissions: {}
-
-env:
-  # renovate: datasource=pypi depName=pre-commit
-  PRE_COMMIT_VERSION: 4.7.0
-  # renovate: datasource=pypi depName=pre-commit-uv
-  PRE_COMMIT_UV_VERSION: 4.4.2
 
 jobs:
   config:
@@ -86,7 +90,10 @@ jobs:
     - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       with:
         enable-cache: false
-        version: 0.13.8
+        version: ${{ inputs.uv-version }}
     - name: Run pre-commit
       shell: bash
+      env:
+        PRE_COMMIT_VERSION: ${{ inputs.pre-commit-version }}
+        PRE_COMMIT_UV_VERSION: ${{ inputs.pre-commit-uv-version }}
       run: uv tool run --from "pre-commit==${PRE_COMMIT_VERSION}" --with "pre-commit-uv==${PRE_COMMIT_UV_VERSION}" pre-commit run --show-diff-on-failure --color=always --config .pre-commit-config-typing.yaml --all-files
