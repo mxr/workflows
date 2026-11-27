@@ -16,9 +16,9 @@ and runs them in isolation.
 
 **Inputs:**
 
-- `uv-version` (required): `uv` version, e.g. `0.13.9`
-- `pre-commit-version` (required): `pre-commit` version, e.g. `4.7.0`
-- `pre-commit-uv-version` (required): `pre-commit-uv` version, e.g. `4.4.3`
+- `uv-version` (optional): `uv` version, latest if unset, e.g. `0.13.9`
+- `pre-commit-version` (optional): `pre-commit` version, latest if unset, e.g. `4.7.0`
+- `pre-commit-uv-version` (optional): `pre-commit-uv` version, latest if unset, e.g. `4.4.3`
 
 **Usage:**
 
@@ -42,9 +42,9 @@ installs tox with `uv` so projects can use `uv.lock` via `runner = "uv-venv-lock
 
 - `env` (required): JSON list of tox environments, e.g. `'["py312", "py313"]'`
 - `os` (required): runner OS, e.g. `ubuntu-latest`
-- `uv-version` (required): `uv` version, e.g. `0.13.9`
-- `tox-version` (required): `tox` version, e.g. `4.67.15`
-- `tox-uv-version` (required): `tox-uv` version, e.g. `1.37.9`
+- `uv-version` (optional): `uv` version, latest if unset, e.g. `0.13.9`
+- `tox-version` (optional): `tox` version, latest if unset, e.g. `4.67.15`
+- `tox-uv-version` (optional): `tox-uv` version, latest if unset, e.g. `1.37.9`
 
 **Usage:**
 

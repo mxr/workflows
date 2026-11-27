@@ -10,13 +10,13 @@ on:
         required: true
         type: string
       uv-version:
-        required: true
+        required: false
         type: string
       tox-version:
-        required: true
+        required: false
         type: string
       tox-uv-version:
-        required: true
+        required: false
         type: string
 
 permissions: {}
@@ -39,7 +39,7 @@ jobs:
       with:
         enable-cache: true
         version: ${{ inputs.uv-version }}
-    - run: uv tool install "tox==$TOX_VERSION" --with "tox-uv==$TOX_UV_VERSION"
+    - run: uv tool install "tox${TOX_VERSION:+==$TOX_VERSION}" --with "tox-uv${TOX_UV_VERSION:+==$TOX_UV_VERSION}"
       shell: bash
       env:
         TOX_VERSION: ${{ inputs.tox-version }}
