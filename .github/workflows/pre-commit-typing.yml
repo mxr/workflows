@@ -96,4 +96,12 @@ jobs:
       env:
         PRE_COMMIT_VERSION: ${{ inputs.pre-commit-version }}
         PRE_COMMIT_UV_VERSION: ${{ inputs.pre-commit-uv-version }}
-      run: uv tool run --from "pre-commit${PRE_COMMIT_VERSION:+==$PRE_COMMIT_VERSION}" --with "pre-commit-uv${PRE_COMMIT_UV_VERSION:+==$PRE_COMMIT_UV_VERSION}" pre-commit run --show-diff-on-failure --color=always --config .pre-commit-config-typing.yaml --all-files
+      run: |
+        uv tool run \
+          --from "pre-commit${PRE_COMMIT_VERSION:+==$PRE_COMMIT_VERSION}" \
+          --with "pre-commit-uv${PRE_COMMIT_UV_VERSION:+==$PRE_COMMIT_UV_VERSION}" \
+          pre-commit run \
+          --show-diff-on-failure \
+          --color=always \
+          --config .pre-commit-config-typing.yaml \
+          --all-files
