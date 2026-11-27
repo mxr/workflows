@@ -14,12 +14,22 @@ and runs them in isolation.
 - `.pre-commit-config.yaml` must set `default_language_version.python`
 - At least one type checking hook from the list above
 
+**Inputs:**
+
+- `uv-version` (optional): `uv` version, latest if unset, e.g. `0.13.9`
+- `pre-commit-version` (optional): `pre-commit` version, latest if unset, e.g. `4.7.0`
+- `pre-commit-uv-version` (optional): `pre-commit-uv` version, latest if unset, e.g. `4.4.3`
+
 **Usage:**
 
 ```yaml
 jobs:
   typing:
     uses: mxr/workflows/.github/workflows/pre-commit-typing.yml@main
+    with:
+      uv-version: 0.13.9
+      pre-commit-version: 4.7.0
+      pre-commit-uv-version: 4.4.3
 ```
 
 ### `tox-uv`
@@ -32,6 +42,9 @@ installs tox with `uv` so projects can use `uv.lock` via `runner = "uv-venv-lock
 
 - `env` (required): JSON list of tox environments, e.g. `'["py312", "py313"]'`
 - `os` (required): runner OS, e.g. `ubuntu-latest`
+- `uv-version` (optional): `uv` version, latest if unset, e.g. `0.13.9`
+- `tox-version` (optional): `tox` version, latest if unset, e.g. `4.67.15`
+- `tox-uv-version` (optional): `tox-uv` version, latest if unset, e.g. `1.37.9`
 
 **Usage:**
 
@@ -42,4 +55,7 @@ jobs:
     with:
       env: '["py312", "py313", "py314"]'
       os: ubuntu-latest
+      uv-version: 0.13.9
+      tox-version: 4.67.15
+      tox-uv-version: 1.37.9
 ```
